@@ -14,12 +14,25 @@ function redirect($url, $statusCode = 303)
 //    $config['path']="../uploads/photo/";
 //    $imageArray=fileUpload($config);
 //    $file_name=$imageArray['file_name'];
-function fileUpload($config){
-    $old=$_REQUEST[$config['old']];
+function fileUpload($config)
+{
+   
+    if(!isset($_REQUEST[$config['old']]) && empty($_REQUEST[$config['old']])){
+        $old="";
+    }
+    else{
+        $old = $_REQUEST[$config['old']];
+    }
     if (isset($_FILES[$config['file']]) && !empty($_FILES[$config['file']]['name'])) {
 
-        if ($old !== "test.jpg") {
-            unlink($config['path'] . $old);
+        if ( isset($old) && !empty($old) && $old!="" || $old !== "test.jpg" ) {
+            //chdir($config['path']);
+            //chown($old,465); 
+            //$_SERVER['DOCUMENT_ROOT'] .
+            if(!is_dir($config['path'] . $old)){
+                unlink($config['path'] . $old);
+            }
+            
         }
 
         $response["error"] = "";
@@ -28,33 +41,33 @@ function fileUpload($config){
         $file_type = $_FILES[$config['file']]['type'];
         $array = explode('.', $_FILES[$config['file']]['name']);
         $file_ext = strtolower(end($array));
-        $extensions = explode("|",strtolower($config['extensions']));
+        $extensions = explode("|", strtolower($config['extensions']));
         $file_name = time() . "." . $file_ext; //$_FILES[$config['file']]['name'];
 
         if (in_array(strtolower($file_ext), $extensions) === false) {
-            $response["error"] = 'extension not allowed select only '.$config['extensions'];
-            $response["file_name"]=$old;
-            $response["code"]=0;
+            $response["error"] = 'extension not allowed select only ' . $config['extensions'];
+            $response["file_name"] = $old;
+            $response["code"] = 0;
         }
 
-        if ($file_size >$config['size']) {
+        if ($file_size > $config['size']) {
             $response["error"] = 'File size exceeds';
-            $response["file_name"]=$old;
-            $response["code"]=0;
+            $response["file_name"] = $old;
+            $response["code"] = 0;
         }
 
         if (empty($response["error"]) == true) {
             move_uploaded_file($file_tmp, $config['path'] . $file_name);
             $response["error"] = "";
-            $response["file_name"]=$file_name;
-            $response["code"]=1;
+            $response["file_name"] = $file_name;
+            $response["code"] = 1;
         } else {
 
         }
     } else {
-        $response["file_name"]=$old;
+        $response["file_name"] = $old;
         $response["error"] = "image not uploaded";
-        $response["code"]=2;
+        $response["code"] = 2;
     }
     return $response;
 }
